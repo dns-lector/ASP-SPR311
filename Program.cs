@@ -11,7 +11,16 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<ITimestampService, UnixTimestampService>();
 // builder.Services.AddTransient<ITimestampService, UnixTimestampService>();
 
+// Налаштування сесій - тривалого сховища, що дозволяє зберігати дані між запитами
+// https://learn.microsoft.com/ru-ru/aspnet/core/fundamentals/app-state?view=aspnetcore-9.0
+builder.Services.AddDistributedMemoryCache();
 
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromSeconds(10);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 
 var app = builder.Build();
@@ -30,6 +39,8 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.UseSession();   // Включення сесій
 
 app.MapControllerRoute(
     name: "default",

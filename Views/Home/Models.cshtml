@@ -1,0 +1,116 @@
+﻿@using ASP_SPR311.Models.Home
+@model HomeModelsViewModel   // у Razor є поле Model, тип якого ми зазначаємо
+@{
+    ViewData["Title"] = "Models";
+}
+
+<div class="text-center">
+    <h1 class="display-4">4. Обіг даних. Моделі</h1>
+</div>
+
+<p>
+    Моделі в ASP - це класи (або об'єкти), які призначені для передачі даних 
+    між різними частинами проєкту. Умовно розрізняють
+</p>
+<ul>
+    <li>
+        Моделі представлень - дані, що необхідні для формування сторінки-представлення
+        (від контролера до представлення)
+    </li>
+    <li>
+        Моделі форм - дані, що передаються від клієнтської частини (від представлення
+        до контролера), зазвичай, введені користувачем
+    </li>
+    <li>
+        Моделі даних (Entities) - дані, що передаються від/до постійного сховища. 
+    </li>
+</ul>
+
+<h2>Моделі форм. Дані від користувача</h2>
+<p>
+    Надсилання форм може здійснюватись двома способами - традиційною HTML-формою та
+    асинхронним AJAX (fetch) запитом.
+</p>
+
+<h3>Надсилання форми HTML</h3>
+
+<form asp-action="Register">
+    Ім'я: <input name="user-name" value="@Model.FormModel?.UserName" /><br />
+    E-mail: <input type="email" name="user-email" value="@Model.FormModel?.UserEmail" /><br />
+    <button>Надіслати</button>
+</form>
+
+@if (Model.FormModel != null)
+{
+    <p>Передано дані: @Model.FormModel.UserName, @Model.FormModel.UserEmail </p>
+}
+
+
+@*********************************************************************@
+<h3>Асинхронне надсилання форми AJAX</h3>
+<form id="ajax-form">
+    Ім'я: <input name="user-name" /><br />
+    E-mail: <input type="email" name="user-email" /><br />
+    <button>Надіслати</button>
+</form>
+<p id="out-1"></p>
+<p id="out-2"></p>
+
+<script>
+    document.addEventListener(               // З метою запобігання автоматичному надсиланню
+        'submit', e => {                     // форм утворюється загальний слухай подій submit
+            const form = e.target;           // Форми розрізняються за id
+            if(form.id == 'ajax-form') {     // 
+                e.preventDefault();          // preventDefault - припинення надсилання
+
+                // в залежності від бекенду надсилаємо форму або 
+                // перетворивши її до JSON
+                const body = {
+                    "userName": form.querySelector('[name="user-name"]').value,
+                    "userEmail": form.querySelector('[name="user-email"]').value,
+                };
+                // або залишаємо формою, створюючи для передачі даних об'єкт FormData
+                const formData = new FormData(form);
+
+                // Надсилаємо дані в AJAX 
+                // для JSON: 
+                fetch( "/Home/AjaxJson", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(body)
+                })
+                .then(r => r.json())
+                .then(j => {
+                    console.log("AJAX-JSON", j);
+                    document.getElementById("out-1").innerText =
+                        `Одержані по JSON дані: userName='${j.userName}', userEmail='${j.userEmail}'`;
+                });
+
+                // для форми:
+                fetch( "/Home/Ajax", {
+                     method: "POST",
+                     body: formData
+                })
+                .then(r => r.json())
+                .then(j => {
+                    console.log("AJAX", j);
+                    document.getElementById("out-2").innerText =
+                        `Одержані по FORM дані: userName='${j.userName}', userEmail='${j.userEmail}'`;
+                });
+            }
+        
+            
+        
+        }
+    );
+
+    /*
+    Розробити форму для написання відгуку щодо товару. 
+    (Автор, коментар, оцінка (1-5), дата, ...)
+    Реалізувати два варіанти передачі даних
+    а) через FormData
+    б) через JSON
+    */
+</script>
