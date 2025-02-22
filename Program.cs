@@ -1,4 +1,6 @@
+using ASP_SPR311.Data;
 using ASP_SPR311.Services.Timestamp;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +23,16 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+// Реєстрація контексту даних - аналогічна до сервісів
+builder.Services.AddDbContext<DataContext>(   // Метод реєстрації - AddDbContext
+    options =>                                // options - те, що передається до 
+        options                               // конструктора DataContext(DbContextOptions options)
+        .UseSqlServer(                        // UseSqlServer - конфігурація для 
+            builder.Configuration             // MS SQL Server
+            .GetConnectionString("LocalMs")   // builder.Configuration - доступ до
+        )                                     // файлів конфігурації (appsettings.json)
+);                                            // 
 
 
 var app = builder.Build();

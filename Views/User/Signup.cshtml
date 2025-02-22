@@ -1,0 +1,77 @@
+﻿@model ASP_SPR311.Models.User.UserSignupViewModel
+@{
+    ViewData["Title"] = "Signup Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Сторінка реєстрації користувача</h1>
+</div>
+
+<br/>
+
+<form asp-controller="User" asp-action="Register">
+    <div class="row justify-content-center">
+        <div class="col-8">
+            
+            <div class="row">
+                <div class="col">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="UserName-addon"><i class="bi bi-person-vcard"></i></span>
+                        <input type="text" class="form-control" value="@Model.FormModel?.UserName"
+                               name="UserName" placeholder="UserName"
+                               aria-label="UserName" aria-describedby="UserName-addon">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="UserEmail-addon"><i class="bi bi-envelope-at"></i></span>
+                        <input type="email" class="form-control" value="@Model.FormModel?.UserEmail"
+                               name="UserEmail" placeholder="UserEmail"
+                               aria-label="UserEmail" aria-describedby="UserEmail-addon">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="UserPhone-addon"><i class="bi bi-telephone"></i></span>
+                        <input type="tel" class="form-control" value="@Model.FormModel?.UserPhone"
+                               name="UserPhone" placeholder="UserPhone"
+                               aria-label="UserPhone" aria-describedby="UserPhone-addon">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="UserLogin-addon"><i class="bi bi-box-arrow-in-right"></i></span>
+                        <input type="text" class="form-control" value="@Model.FormModel?.UserLogin"
+                               name="UserLogin" placeholder="UserLogin"
+                               aria-label="UserLogin" aria-describedby="UserLogin-addon">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="UserPassword-addon"><i class="bi bi-key"></i></span>
+                        <input type="password" class="form-control" value="@Model.FormModel?.UserPassword"
+                               name="UserPassword" placeholder="UserPassword"
+                               aria-label="UserPassword" aria-describedby="UserPassword-addon">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="UserRepeat-addon"><i class="bi bi-lock"></i></span>
+                        <input type="password" class="form-control" value="@Model.FormModel?.UserRepeat"
+                               name="UserRepeat" placeholder="UserRepeat"
+                               aria-label="UserRepeat" aria-describedby="UserRepeat-addon">
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-outline-secondary">Надіслати</button>
+
+        </div>
+    </div>
+</form>
