@@ -1,14 +1,18 @@
 ﻿using ASP_SPR311.Data;
 using ASP_SPR311.Models.User;
+using ASP_SPR311.Services.Kdf;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Text.Json;
 
 namespace ASP_SPR311.Controllers
 {
-    public class UserController(DataContext dataContext) : Controller
+    public class UserController(DataContext dataContext, IKdfService kdfService) : Controller
     {
         private const String signupFormKey = "UserSignupFormModel";
         private readonly DataContext _dataContext = dataContext;
+        private readonly IKdfService _kdfService = kdfService;
 
         public IActionResult Index()
         {
@@ -41,7 +45,7 @@ namespace ASP_SPR311.Controllers
                         Email = viewModel.FormModel!.UserEmail,
                         Phone = viewModel.FormModel!.UserPhone,
                     });
-                    String salt = "salt";
+                    String salt = Guid.NewGuid().ToString()[..16];
                     _dataContext.UserAccesses.Add(new()
                     {
                          Id = Guid.NewGuid(),
@@ -49,7 +53,9 @@ namespace ASP_SPR311.Controllers
                          Login = viewModel.FormModel!.UserLogin,
                          RoleId = "guest",
                          Salt = salt,
-                         Dk = salt + viewModel.FormModel!.UserPassword,
+                         Dk = _kdfService.DerivedKey(
+                             viewModel.FormModel!.UserPassword,
+                             salt),
                     });
                     _dataContext.SaveChanges();
                 }
@@ -60,6 +66,56 @@ namespace ASP_SPR311.Controllers
             return View(viewModel);
         }
 
+        public IActionResult Signin()
+        {
+            // 'Basic' HTTP Authentication Scheme  https://datatracker.ietf.org/doc/html/rfc7617#section-2
+            // Дані автентифікації приходять у заголовку Authorization
+            // за схемою  Authentication: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==
+            // де дані - Base64 закодована послідовність "login:password"
+            String authHeader = Request.Headers.Authorization.ToString();
+            if (String.IsNullOrEmpty(authHeader))
+            {
+                return Json(new { status = 401, message = "Authorization header required" });
+            }
+            String scheme = "Basic ";
+            if( ! authHeader.StartsWith(scheme))
+            {
+                return Json(new { status = 401, message = $"Authorization scheme must be {scheme}" });
+            }
+            String credentials = authHeader[scheme.Length..];
+            String authData;
+            try 
+            { 
+                authData = System.Text.Encoding.UTF8.GetString( 
+                    Base64UrlTextEncoder.Decode(credentials)
+                ); 
+            }
+            catch
+            {
+                return Json(new { status = 401, message = $"Not valid Base64 code '{credentials}'" });
+            }
+            // authData == "login:password"
+            String[] parts = authData.Split(':', 2);
+            if(parts.Length != 2)
+            {
+                return Json(new { status = 401, message = $"Not valid credentials format (missing ':'?)" });
+            }
+            String login = parts[0];
+            String password = parts[1];
+            var userAccess = _dataContext.UserAccesses.FirstOrDefault(ua => ua.Login == login);
+            if(userAccess == null)
+            {
+                return Json(new { status = 401, message = "Credentials rejected" });
+            }
+            if(_kdfService.DerivedKey(password, userAccess.Salt) != userAccess.Dk)
+            {
+                return Json(new { status = 401, message = "Credentials rejected." });
+            }
+            // Зберігаємо у сесію відомості про автентифікацію
+            HttpContext.Session.SetString("userAccessId", userAccess.Id.ToString());
+
+            return Json(new { status = 200, message = "OK" });
+        }
         public RedirectToActionResult Register([FromForm] UserSignupFormModel formModel)
         {
             HttpContext.Session.SetString(            // Збереження у сесії
@@ -117,6 +173,37 @@ namespace ASP_SPR311.Controllers
         }
     }
 }
+/* Автентифікація - підтвердження особи, одержання "посвідчення" (токену)
+ * Авторизація - підтвердження права доступу автентифікованої "особи" до
+ *   певного контенту
+ * У залежності від архітектури системи токени зберігаються або
+ *  - у клієнта (розподілена архітектура, SPA)
+ *  - у сервера (серверна активність, ASP)
+ *  
+ * За технологією ASP використовуються НТТР-сесії для збереження даних між
+ * запитами. При кожному запиті перевіряється наявність у сесії токена і 
+ * приймається рішення щодо авторизації.
+ *  
+ <auth-form> --> site.js --X
+                 fetch ---->  ASP
+                   ?   <---  auth-status     
+                 + reload()
+                 - error
+
+Base64 - кодування з 64-ма символами
+                               A        B        C
+ASCII(8 біт): ABC -->       01000001 01000010 01000011
+ділимо по 6 біт:            010000 010100 001001 000011
+визначаємо Base64-символи     Q      U      J       D
+код для "АВС" - "QUJD"
+Якщо на 6 не ділиться, то вживається символ вирівнювання "="
+    A        B     
+ 01000001 01000010 
+ 010000 010100 0010(00)
+    Q      U     I  =            --> QUI=
+
+ */
+
 /* Д.З. Розширити таблицю даних про користувача, ввести поля різного типу
  * (дата, число ціле, число дробове, тощо) з різною обов'язковістю
  * - дата реєстрації

@@ -1,4 +1,33 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿document.addEventListener('submit', e => {
+    const form = e.target;
+    if (form.id == "auth-modal-form") {
+        e.preventDefault();
+        const login = form.querySelector('[name="AuthLogin"]').value;
+        const password = form.querySelector('[name="AuthPassword"]').value;
 
-// Write your JavaScript code.
+        const credentials = btoa(login + ':' + password);
+        fetch("/User/Signin", {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Basic ' + credentials
+            }
+        }).then(r => r.json())
+            .then(j => {
+                if (j.status == 200) {
+                    window.location.reload();
+                }
+                else {
+                    console.log(j.message);
+                }
+            });
+        // console.log("Submit stopped");
+    }
+});
+/*
+Д.З. Забезпечити перевірку полів логіну/паролю форми автентифікації на пустоту.
+Якщо пусті - не надсилати запит, а повідомляти клієнту.
+Провести тестування бекенду /User/Signin на предмет пошкоджених запитів
+(немає заголовку Authorization / неправильна схема / неправильні дані)
+У складі модального вікна автентифікації додати поле для виведення помилок
+ і у разі відмови входу в систему показувати помилки у ньому.
+*/

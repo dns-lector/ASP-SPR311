@@ -9,6 +9,11 @@
         public String Salt { get; set; } = null!;
         public String Dk { get; set; } = null!;
 
+        // Навігаційні властивості - властивості (get; set;), що посилаються на 
+        // інші сутності (Entities). EntityFramework може автоматично їх 
+        // заповнювати через зв'язки
+        public UserData UserData { get; set; } = null!;
+
 
         public override string ToString()
         {
