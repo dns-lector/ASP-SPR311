@@ -1,6 +1,7 @@
 using ASP_SPR311.Data;
 using ASP_SPR311.Middleware;
 using ASP_SPR311.Services.Kdf;
+using ASP_SPR311.Services.Storage;
 using ASP_SPR311.Services.Timestamp;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,7 @@ builder.Services.AddSingleton<ITimestampService, UnixTimestampService>();
 // builder.Services.AddTransient<ITimestampService, UnixTimestampService>();
 
 builder.Services.AddSingleton<IKdfService, PbKdf1Service>();
+builder.Services.AddSingleton<IStorageService, FileStorageService>();
 
 
 // Налаштування сесій - тривалого сховища, що дозволяє зберігати дані між запитами

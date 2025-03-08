@@ -1,0 +1,22 @@
+﻿@model ASP_SPR311.Models.Shop.ShopIndexViewModel
+
+@{
+    ViewData["Title"] = "Shop";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Крамниця</h1>
+</div>
+
+@foreach(var category in Model.Categories)
+{
+    <img src="/Shop/Image/@(category.ImageUrl)" alt="Image"/>
+    <p>@category.Name</p>
+}
+@*
+    Д.З. Реалізувати валідацію форм адміністратора
+    а) на фронтенді (засобами JS до надсилання до сервера)
+    б) на бекенді, додавши перевірку на унікальність Slug
+    Результати валідації відобразити у складі форми.
+    До звіту з ДЗ додати скріншоти результатів роботи.
+*@

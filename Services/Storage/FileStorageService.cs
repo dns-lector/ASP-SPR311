@@ -1,7 +1,7 @@
 ﻿
 namespace ASP_SPR311.Services.Storage
 {
-    public class FileStorageService : IStorgeService
+    public class FileStorageService : IStorageService
     {
         private const String storagePath = "C:\\storage\\ASP311\\";
 

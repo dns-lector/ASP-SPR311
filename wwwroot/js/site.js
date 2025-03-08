@@ -22,6 +22,16 @@
             });
         // console.log("Submit stopped");
     }
+    if (form.id == "admin-category-form") {
+        e.preventDefault();
+        fetch("/Admin/AddCategory", {
+            method: 'POST',
+            body: new FormData(form)
+        }).then(r => r.json())
+            .then(j => {                
+                console.log(j);
+            });
+    }
 });
 /*
 Д.З. Забезпечити перевірку полів логіну/паролю форми автентифікації на пустоту.
