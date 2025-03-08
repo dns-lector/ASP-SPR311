@@ -7,6 +7,7 @@ namespace ASP_SPR311.Data
         public DbSet<Entities.UserData>   UsersData    { get; private set; }
         public DbSet<Entities.UserRole>   UserRoles    { get; private set; }
         public DbSet<Entities.UserAccess> UserAccesses { get; private set; }
+        public DbSet<Entities.Category>   Categories   { get; private set; }
 
         public DataContext(DbContextOptions options) : base(options)
         { }
@@ -14,6 +15,10 @@ namespace ASP_SPR311.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("ASP");
+
+            modelBuilder.Entity<Entities.Category>()
+                .HasIndex(c => c.Slug)
+                .IsUnique();
 
             modelBuilder.Entity<Entities.UserAccess>()
                 .HasIndex(a => a.Login)
@@ -24,6 +29,12 @@ namespace ASP_SPR311.Data
                 .WithMany()
                 .HasForeignKey(ua => ua.UserId)
                 .HasPrincipalKey(u => u.Id);
+
+            modelBuilder.Entity<Entities.UserAccess>()
+                .HasOne(ua => ua.UserRole)
+                .WithMany()
+                .HasForeignKey(ua => ua.RoleId);   // якщо імена полів стандартні (Id), то
+                //.HasPrincipalKey(r => r.Id);     // можна не зазначати
 
 
 

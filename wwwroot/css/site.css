@@ -20,3 +20,11 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.auth-letter {
+    background-color: purple;
+    border-radius: 50%;
+    color: snow;
+    display: inline-block;
+    padding: 0.1em 0.5em;
+}
