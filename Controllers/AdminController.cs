@@ -22,9 +22,53 @@ namespace ASP_SPR311.Controllers
                 Response.StatusCode = StatusCodes.Status403Forbidden;
                 return NoContent();
             }
+            AdminIndexViewModel viewModel = new()
+            {
+                Categories = _dataContext.Categories.ToList(),
+            };
 
-            return View();
+            return View(viewModel);
         }
+
+        [HttpPost]
+        public JsonResult AddProduct(ProductFormModel formModel)
+        {
+            double price;
+            try { 
+                price = double.Parse(formModel.Price, System.Globalization.CultureInfo.InvariantCulture); 
+            }
+            catch
+            {
+                price = double.Parse(formModel.Price.Replace(',', '.'), System.Globalization.CultureInfo.InvariantCulture);
+            }
+            Product product = new()
+            {
+                Id = Guid.NewGuid(),
+                CategoryId = formModel.CategoryId,
+                Name = formModel.Name,
+                Description = formModel.Description,
+                Slug = formModel.Slug,
+                Price = price,
+                Stock = formModel.Stock,
+                ImagesCsv = String.Join(',', 
+                    formModel
+                    .Images
+                    .Select(img => _storageService.SaveFile(img))
+                ),
+            };
+            _dataContext.Products.Add(product);
+            try
+            {
+                _dataContext.SaveChanges();
+            }
+            catch
+            {
+                // _storageService.DeleteFile(category.ImageUrl)
+            }
+            return Json(product);
+        }
+    
+
 
         [HttpPost]
         public JsonResult AddCategory(CategoryFormModel formModel)

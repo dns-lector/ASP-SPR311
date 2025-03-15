@@ -1,0 +1,20 @@
+﻿@model ASP_SPR311.Models.Shop.ShopCategoryViewModel
+
+@if(Model.Category == null)
+{
+    <div class="text-center">
+        <h1 class="display-4">Запитана категорія не знайдена</h1>
+    </div>
+}
+else
+{
+    <div class="text-center">
+        <h1 class="display-4">Категорія @Model.Category.Name</h1>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        @foreach (var product in Model.Category.Products)
+        {
+            @Html.DisplayFor(m => product, "ProductCard")
+        }
+    </div>
+}

@@ -3,7 +3,9 @@ using ASP_SPR311.Middleware;
 using ASP_SPR311.Services.Kdf;
 using ASP_SPR311.Services.Storage;
 using ASP_SPR311.Services.Timestamp;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,6 +70,11 @@ app.UseAuthSession();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+
+using var scope = app.Services.CreateScope();
+await using var dataContext = scope.ServiceProvider.GetRequiredService<DataContext>();
+await dataContext.Database.MigrateAsync();
 
 app.Run();
 /* Д.З. Створити сервіс генерування випадкового ОТР (one time password) 

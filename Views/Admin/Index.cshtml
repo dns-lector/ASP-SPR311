@@ -1,4 +1,6 @@
-﻿<div class="text-center">
+﻿@model ASP_SPR311.Models.Admin.AdminIndexViewModel
+
+<div class="text-center">
     <h1 class="display-4">Сторінка адміністратора</h1>
 </div>
 
@@ -15,5 +17,20 @@
     </div>
     <div class="col">
         <h2>Товари</h2>
+        <form id="admin-product-form" enctype="multipart/form-data">
+            Назва: <input name="product-name" /><br />
+            Опис: <textarea name="product-description"></textarea><br />
+            Артикул/штрихкод: <input name="product-slug" /><br />
+            Картинки:<input name="product-image" type="file" multiple /><br />
+            Ціна: <input name="product-price" type="number" step="0.01"/><br />
+            Кількість: <input name="product-stock" type="number" step="1" /><br />
+            Категорія: <select name="category-id">
+                @foreach(var c in Model.Categories)
+                {
+                    <option value="@c.Id">@c.Name</option>
+                }
+            </select>
+            <button type="submit">Додати</button>
+        </form>
     </div>
 </div>

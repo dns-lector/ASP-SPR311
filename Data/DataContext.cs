@@ -8,6 +8,7 @@ namespace ASP_SPR311.Data
         public DbSet<Entities.UserRole>   UserRoles    { get; private set; }
         public DbSet<Entities.UserAccess> UserAccesses { get; private set; }
         public DbSet<Entities.Category>   Categories   { get; private set; }
+        public DbSet<Entities.Product>    Products     { get; private set; }
 
         public DataContext(DbContextOptions options) : base(options)
         { }
@@ -15,6 +16,21 @@ namespace ASP_SPR311.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("ASP");
+
+            modelBuilder.Entity<Entities.Product>()
+                .HasIndex(p => p.Slug)
+                .IsUnique();
+
+            modelBuilder.Entity<Entities.Product>()
+                .HasOne(p => p.Category)
+                .WithMany(c => c.Products)
+                .HasForeignKey(p => p.CategoryId)   // Не обов'язково якщо імена правильні
+                .HasPrincipalKey(c => c.Id);        // Id -- [Entity]Id
+
+            modelBuilder.Entity<Entities.Category>()
+                .HasOne(c => c.ParentCategory)
+                .WithMany()
+                .HasForeignKey(c => c.ParentId);    // Обов'язково, оскільки не CategoryId
 
             modelBuilder.Entity<Entities.Category>()
                 .HasIndex(c => c.Slug)

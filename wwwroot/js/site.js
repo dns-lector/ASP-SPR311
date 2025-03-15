@@ -32,6 +32,16 @@
                 console.log(j);
             });
     }
+    if (form.id == "admin-product-form") {
+        e.preventDefault();
+        fetch("/Admin/AddProduct", {
+            method: 'POST',
+            body: new FormData(form)
+        }).then(r => r.json())
+            .then(j => {                
+                console.log(j);
+            });
+    }
 });
 /*
 Д.З. Забезпечити перевірку полів логіну/паролю форми автентифікації на пустоту.
