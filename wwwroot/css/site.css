@@ -28,3 +28,20 @@ body {
     display: inline-block;
     padding: 0.1em 0.5em;
 }
+
+.card-body {
+    position: relative;
+}
+.card-fab {
+    align-items: center;
+    background-color: mediumaquamarine;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    right: 1em;
+    top: -1em;
+    height: 2.5em;
+    width: 2.5em;
+}

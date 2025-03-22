@@ -1,66 +1,66 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using System.Globalization;
 
 namespace ASP_SPR311.Models
 {
-    //public class DoubleModelBinder : IModelBinder
-    //{
+    public class DoubleModelBinder : IModelBinder
+    {
+        public Task BindModelAsync(ModelBindingContext bindingContext)
+        {
+            if (bindingContext == null)
+            {
+                throw new ArgumentNullException(nameof(bindingContext));
+            }
 
+            var modelName = bindingContext.ModelName;
 
-    //    public override object BindModel(ControllerContext controllerContext, ModelBindingContext bindingContext)
-    //    {
-    //        var result = bindingContext.ValueProvider.GetValue(bindingContext.ModelName);
-    //        if (result != null && !string.IsNullOrEmpty(result.AttemptedValue))
-    //        {
-    //            if (bindingContext.ModelType == typeof(double))
-    //            {
-    //                double temp;
-    //                var attempted = result.AttemptedValue.Replace(",", ".");
-    //                if (double.TryParse(
-    //                    attempted,
-    //                    NumberStyles.Number,
-    //                    CultureInfo.InvariantCulture,
-    //                    out temp)
-    //                )
-    //                {
-    //                    return temp;
-    //                }
-    //            }
-    //        }
-    //        return base.BindModel(controllerContext, bindingContext);
-    //    }
+            // Try to fetch the value of the argument by name
+            var valueProviderResult = bindingContext.ValueProvider.GetValue(modelName);
 
-    //    public Task BindModelAsync(ModelBindingContext bindingContext)
-    //    {
-    //        ValueProviderResult valueResult = bindingContext.ValueProvider
-    //        .GetValue(bindingContext.ModelName);
-    //        if (bindingContext.ModelType == typeof(double))
-    //        {
-    //            double temp;
-    //            String attempted = valueResult.
-    //                attempted,
-    //                NumberStyles.Number,
-    //                CultureInfo.InvariantCulture,
-    //                out temp)
-    //            )
-    //            {
-    //                return temp;
-    //            }
-    //        }
-    //        object actualValue = null;
-    //        try
-    //        {
-    //            actualValue = Convert.ToDecimal(valueResult.AttemptedValue,
-    //                CultureInfo.CurrentCulture);
-    //        }
-    //        catch (FormatException e)
-    //        {
-    //            modelState.Errors.Add(e);
-    //        }
+            if (valueProviderResult == ValueProviderResult.None)
+            {
+                return Task.CompletedTask;
+            }
 
-    //        bindingContext.ModelState.Add(bindingContext.ModelName, modelState);
-    //        return actualValue;
-    //    }
-    //}
+            bindingContext.ModelState.SetModelValue(modelName, valueProviderResult);
+
+            var value = valueProviderResult.FirstValue;
+
+            // Check if the argument value is null or empty
+            if (string.IsNullOrEmpty(value))
+            {
+                return Task.CompletedTask;
+            }
+            if (!double.TryParse(value, CultureInfo.InvariantCulture, out double result))
+            {
+                if (!double.TryParse(value.Replace(',', '.'),
+                        CultureInfo.InvariantCulture, out result))
+                {
+                    bindingContext.ModelState.TryAddModelError(
+                        modelName, "Double parse error.");
+                    return Task.CompletedTask;
+                }
+            }
+
+            bindingContext.Result = ModelBindingResult.Success(result);
+            return Task.CompletedTask;
+        }
+    }
+    public class DoubleBinderProvider : IModelBinderProvider
+    {
+        public IModelBinder GetBinder(ModelBinderProviderContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            if (context.Metadata.ModelType == typeof(double))
+            {
+                return new BinderTypeModelBinder(typeof(DoubleModelBinder));
+            }
+
+            return null!;
+        }
+    }
+    // https://learn.microsoft.com/en-us/aspnet/core/mvc/advanced/custom-model-binding?view=aspnetcore-9.0
 }

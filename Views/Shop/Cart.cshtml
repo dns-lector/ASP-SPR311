@@ -1,0 +1,18 @@
+﻿@model ASP_SPR311.Models.Shop.ShopCartViewModel
+
+@{
+    ViewData["Title"] = "Cart";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Мій кошик</h1>
+</div>
+
+@if(Model.Cart == null)
+{
+    <h2>У вас немає активного кошику</h2>
+}
+else
+{
+    <h2>У вашему кошику @(Model.Cart.CartItems.Count) позицій</h2>
+}

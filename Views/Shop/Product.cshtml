@@ -1,0 +1,37 @@
+﻿@model ASP_SPR311.Models.Shop.ShopProductViewModel
+
+@foreach (var breadcrumb in Model.BreadCrumbs)
+{
+    <a href="@breadcrumb.Url">@breadcrumb.Title</a> 
+}
+
+
+@if (Model.Product == null)
+{
+    <div class="text-center">
+        <h1 class="display-4">Запитаний товар не знайдено</h1>
+    </div>
+}
+else
+{
+    <div class="text-center">
+        <h1 class="display-4">Товар @Model.Product.Name</h1>
+    </div>
+    <div class="row">
+        <div class="col col-4">
+            @foreach (var image in Model.Product.ImagesCsv
+                .Split(',', StringSplitOptions.RemoveEmptyEntries))
+            {
+                <img src="/Shop/Image/@image" alt="Image" class="img-fluid" />
+            }
+    
+        </div>
+        <div class="col col-8">
+            Назва: @Model.Product.Name<br/>
+            Опис: @Model.Product.Description<br/>
+            Ціна: @Model.Product.Price грн.<br />
+            На складі: @Model.Product.Stock шт<br />
+
+        </div>
+    </div>
+}

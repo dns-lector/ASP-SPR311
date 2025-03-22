@@ -1,5 +1,6 @@
 using ASP_SPR311.Data;
 using ASP_SPR311.Middleware;
+using ASP_SPR311.Models;
 using ASP_SPR311.Services.Kdf;
 using ASP_SPR311.Services.Storage;
 using ASP_SPR311.Services.Timestamp;
@@ -44,6 +45,10 @@ builder.Services.AddDbContext<DataContext>(   // Метод реєстрації - AddDbContext
         )                                     // файлів конфігурації (appsettings.json)
 );                                            // 
 
+builder.Services.AddControllers(options =>
+{
+    options.ModelBinderProviders.Insert(0, new DoubleBinderProvider());
+});
 
 var app = builder.Build();
 

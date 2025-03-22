@@ -43,6 +43,40 @@
             });
     }
 });
+
+document.addEventListener('DOMContentLoaded', e => {
+    for (let fab of document.querySelectorAll('[data-cart-product-id]')) {
+        fab.addEventListener('click', addToCartClick);
+    }
+});
+
+function addToCartClick(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    const elem = document.querySelector('[data-auth-ua-id]');
+    if (!elem) {
+        alert('Увійдіть до системи для здійснення замовлень');
+        return;
+    }
+    const uaId = elem.getAttribute('data-auth-ua-id');
+    const productId = e.target.closest('[data-cart-product-id]').getAttribute('data-cart-product-id');
+    console.log(productId, uaId);
+    fetch('/Shop/AddToCart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `productId=${productId}&uaId=${uaId}`
+    }).then(r => r.json()).then(j => {
+        if (j.status == 200) {
+            alert("Додано до кошику");
+        }
+        else {
+            alert("Помилка додавання");
+        }
+    });
+}
+
 /*
 Д.З. Забезпечити перевірку полів логіну/паролю форми автентифікації на пустоту.
 Якщо пусті - не надсилати запит, а повідомляти клієнту.

@@ -9,6 +9,9 @@ namespace ASP_SPR311.Data
         public DbSet<Entities.UserAccess> UserAccesses { get; private set; }
         public DbSet<Entities.Category>   Categories   { get; private set; }
         public DbSet<Entities.Product>    Products     { get; private set; }
+        public DbSet<Entities.Cart>       Carts        { get; private set; }
+        public DbSet<Entities.CartItem>   CartItems    { get; private set; }
+
 
         public DataContext(DbContextOptions options) : base(options)
         { }
@@ -16,6 +19,19 @@ namespace ASP_SPR311.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("ASP");
+
+            modelBuilder.Entity<Entities.CartItem>()
+                .HasOne(ci => ci.Cart)
+                .WithMany(c => c.CartItems);
+            modelBuilder.Entity<Entities.CartItem>()
+                .HasOne(ci => ci.Product)
+                .WithMany();
+
+            modelBuilder.Entity<Entities.Cart>()
+                .HasOne(c => c.UserAccess)
+                .WithMany()
+                .HasForeignKey(c => c.UserAccessId)
+                .HasPrincipalKey(ua => ua.Id);
 
             modelBuilder.Entity<Entities.Product>()
                 .HasIndex(p => p.Slug)
