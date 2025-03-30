@@ -14,5 +14,14 @@
 }
 else
 {
-    <h2>У вашему кошику @(Model.Cart.CartItems.Count) позицій</h2>
+    @foreach(var item in Model.Cart.CartItems)
+    {
+        @Html.DisplayFor(m => item, "CartItem")
+    }
+    <hr/>
+    <div class="row">
+        <div class="col offset-4 col-1">Разом</div>
+        <div class="col col-1">2</div>
+        <div class="col col-1">@Model.Cart.Price.ToString("0.00")</div>
+    </div>
 }

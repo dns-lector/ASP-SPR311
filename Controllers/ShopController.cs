@@ -74,14 +74,29 @@ namespace ASP_SPR311.Controllers
             String? uaId = HttpContext.User.Claims
                 .FirstOrDefault(c => c.Type == ClaimTypes.Sid)?.Value;
 
+            Cart? cart = _dataContext
+                .Carts
+                .Include(c => c.CartItems)
+                    .ThenInclude(ci => ci.Product)
+                .FirstOrDefault(c => c.UserAccessId.ToString() == uaId);
+
             ShopCartViewModel viewModel = new()
             {
-                Cart = _dataContext
-                    .Carts
-                    .Include(c => c.CartItems)
-                    .FirstOrDefault(c => c.UserAccessId.ToString() == uaId)
+                Cart = cart == null ? null :
+                    cart with { 
+                        CartItems = [.. cart.CartItems
+                        .Select(ci => ci with { 
+                            Product = ci.Product with {
+                                ImagesCsv = String.IsNullOrEmpty(ci.Product.ImagesCsv)
+                                ? "/Shop/Image/no-image.jpg"
+                                : ci.Product.ImagesCsv = String.Join(',',
+                                    ci.Product.ImagesCsv
+                                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(img => "/Shop/Image/" + img))
+                            }
+                        })]
+                    }
             };
-
             return View(viewModel);
         }
 
@@ -136,6 +151,49 @@ namespace ASP_SPR311.Controllers
             return Json(new { Status = 200 });
         }
 
+        [HttpPut]
+        public JsonResult ModifyCartItem([FromQuery] String cartId, [FromQuery] int delta)
+        {
+            if(delta == 0)
+            {
+                return Json(new { Status = 400, Message = "No action needed for 0 delta" });
+            }
+            Guid cartGuid;
+            try { cartGuid = Guid.Parse(cartId); }
+            catch { return Json(new { Status = 400, Message = "Invalid cartId format: UUID expected" }); }
+
+            CartItem? cartItem = _dataContext.CartItems
+                .Include(ci => ci.Product)
+                .Include(ci => ci.Cart)
+                .FirstOrDefault(ci => ci.Id == cartGuid);
+            if (cartItem == null)
+            {
+                return Json(new { Status = 404, Message = "No item with requested cartId" });
+            }
+            int newQuantity = cartItem.Quantity + delta;
+            if(newQuantity < 0)
+            {
+                return Json(new { Status = 400, Message = "Invalid delta: negative total quantity" });
+            }
+            if(newQuantity > cartItem.Product.Stock)
+            {
+                return Json(new { Status = 422, Message = "Delta too large: stock limit exceeded" });
+            }
+            if(newQuantity == 0)
+            {
+                cartItem.Cart.Price -= cartItem.Price;
+                _dataContext.CartItems.Remove(cartItem);
+            }
+            else
+            {
+                cartItem.Cart.Price += delta * cartItem.Product.Price;  // + Actions
+                cartItem.Price += delta * cartItem.Product.Price;  // + Actions
+                cartItem.Quantity = newQuantity;
+            }
+            _dataContext.SaveChanges();
+            return Json(new { Status = 200, Message = "Modifed" });
+        }
+
         public FileResult Image([FromRoute] String id)
         {
             return File(
@@ -156,6 +214,31 @@ namespace ASP_SPR311.Controllers
  *                   IsCanceled         Price
  *                   Price                ActionId  --------------- [Actions]
  *                     ActionId -----------------------------------
+ *                     
+ *                     
+ * API:  Application - Program Interface                   
+ * Інтерфейс взаємодії Програми з своїми Застосунками                    
+ * Програма - інформаційний "центр" системи, частіше за все бекенд                    
+ * Застосунок (Application) - самостійний модуль, програма, що для 
+ *  своєї роботи обмінюється даними з Програмою
+ * [Додаток - не самостійна програма - Plugin, Addon]                    
+ *                     
+ * Інтерфейс - набір правил та шаблонів за яким відбувається обмін
+ *  даними
+ *               API               API
+ *      OpenAPI   --    Program     --   Tests
+ *                  /       |      \
+ *       Web-Front        Mobile       Desktop
+ *        (Site)        Android/iOS     
+ *                     
+ *                     
+ *                     
+ *                     
+ *   Cart --------> Clone       Cart --------> Clone
+ *     |          /               |                |
+ *    CartItem   /               CartItem ------> Clone
+ *       |                          |                |
+ *     Product                    Product --------> Clone
  *                     
  Д.З. Забезпечити повідомлення на сторінці кошику якщо на неї
  заходить неавторизований користувач.

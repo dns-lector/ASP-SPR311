@@ -45,3 +45,8 @@ body {
     height: 2.5em;
     width: 2.5em;
 }
+.cart-product-img {
+    width: 99%;
+    max-height: 5em;
+    max-width: 7em;
+}
