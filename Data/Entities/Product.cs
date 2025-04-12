@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace ASP_SPR311.Data.Entities
 {
@@ -14,7 +15,9 @@ namespace ASP_SPR311.Data.Entities
         [Column(TypeName = "decimal(12, 2)")]
         public decimal Price       { get; set; }
         public int     Stock       { get; set; } = 1;
+        public DateTime? DeletedAt { get; set; }
 
+        [JsonIgnore]
         public Category Category   { get; set; } = null!;
     }
 }

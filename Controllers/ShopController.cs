@@ -9,8 +9,9 @@ using System.Security.Claims;
 
 namespace ASP_SPR311.Controllers
 {
-    public class ShopController(DataContext dataContext, IStorageService storageService) : Controller
+    public class ShopController(DataAccessor dataAccessor, DataContext dataContext, IStorageService storageService) : Controller
     {
+        private readonly DataAccessor _dataAccessor = dataAccessor;
         private readonly DataContext _dataContext = dataContext;
         private readonly IStorageService _storageService = storageService;
 
@@ -18,7 +19,7 @@ namespace ASP_SPR311.Controllers
         {
             ShopIndexViewModel viewModel = new()
             {
-                Categories = _dataContext.Categories.ToList()
+                Categories = _dataAccessor.AllCategories()
             };
 
             return View(viewModel);
@@ -194,14 +195,30 @@ namespace ASP_SPR311.Controllers
             return Json(new { Status = 200, Message = "Modifed" });
         }
 
-        public FileResult Image([FromRoute] String id)
+        public IActionResult Image([FromRoute] String id)
         {
-            return File(
-                System.IO.File.ReadAllBytes(
-                    _storageService.GetRealPath(id)), 
-                "image/jpeg",false
-            );
+            String realPath = _storageService.GetRealPath(id);
+            if (Path.Exists(realPath))
+            {
+                String ext = Path.GetExtension(id);
+                if( ! _mimeTypes.TryGetValue(ext, out var mime))
+                {
+                    mime = "application/octet-stream";
+                }                
+                return File(
+                    System.IO.File.OpenRead(realPath),
+                    mime,
+                    true
+                );
+            }
+            return NotFound();            
         }
+
+        private Dictionary<string, string> _mimeTypes = new() {
+            { ".jpg", "image/jpeg" },
+            { ".png", "image/png" },
+            { ".webp", "image/webp" },
+        };
     }
 }
 /* Кошик споживача (замовлення товарів)

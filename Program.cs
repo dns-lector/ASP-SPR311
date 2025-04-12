@@ -5,6 +5,7 @@ using ASP_SPR311.Services.Kdf;
 using ASP_SPR311.Services.Storage;
 using ASP_SPR311.Services.Timestamp;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using System;
 
@@ -43,12 +44,26 @@ builder.Services.AddDbContext<DataContext>(   // Метод реєстрації - AddDbContext
             builder.Configuration             // MS SQL Server
             .GetConnectionString("LocalMs")   // builder.Configuration - доступ до
         )                                     // файлів конфігурації (appsettings.json)
-);                                            // 
+);
+builder.Services.AddScoped<DataAccessor>();
+
 
 builder.Services.AddControllers(options =>
 {
     options.ModelBinderProviders.Insert(0, new DoubleBinderProvider());
 });
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddCors(options =>
+{    
+    options.AddPolicy(
+        name:"CorsPolicy",
+        policy =>
+        {
+            policy.AllowAnyOrigin();
+        });
+});
+
 
 var app = builder.Build();
 
@@ -64,6 +79,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseCors("CorsPolicy");
 
 app.UseAuthorization();
 
