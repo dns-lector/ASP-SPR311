@@ -4,13 +4,14 @@ namespace ASP_SPR311.Data
 {
     public class DataContext : DbContext
     {
-        public DbSet<Entities.UserData>   UsersData    { get; private set; }
-        public DbSet<Entities.UserRole>   UserRoles    { get; private set; }
-        public DbSet<Entities.UserAccess> UserAccesses { get; private set; }
-        public DbSet<Entities.Category>   Categories   { get; private set; }
-        public DbSet<Entities.Product>    Products     { get; private set; }
-        public DbSet<Entities.Cart>       Carts        { get; private set; }
-        public DbSet<Entities.CartItem>   CartItems    { get; private set; }
+        public DbSet<Entities.UserData>    UsersData    { get; private set; }
+        public DbSet<Entities.UserRole>    UserRoles    { get; private set; }
+        public DbSet<Entities.UserAccess>  UserAccesses { get; private set; }
+        public DbSet<Entities.Category>    Categories   { get; private set; }
+        public DbSet<Entities.Product>     Products     { get; private set; }
+        public DbSet<Entities.Cart>        Carts        { get; private set; }
+        public DbSet<Entities.CartItem>    CartItems    { get; private set; }
+        public DbSet<Entities.AccessToken> AccessTokens { get; private set; }
 
 
         public DataContext(DbContextOptions options) : base(options)
@@ -19,6 +20,9 @@ namespace ASP_SPR311.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("ASP");
+
+            modelBuilder.Entity<Entities.AccessToken>()
+                .HasKey(t => t.Jti);
 
             modelBuilder.Entity<Entities.CartItem>()
                 .HasOne(ci => ci.Cart)
