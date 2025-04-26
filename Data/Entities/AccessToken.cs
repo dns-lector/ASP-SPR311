@@ -1,4 +1,6 @@
-﻿namespace ASP_SPR311.Data.Entities
+﻿using System.Text.Json.Serialization;
+
+namespace ASP_SPR311.Data.Entities
 {
     public class AccessToken
     {
@@ -9,6 +11,12 @@
         public DateTime? Nbf { get; set; }   // Not before
         public DateTime  Exp { get; set; }
         public String?   Iss { get; set; }   // Issuer
+
+        // [JsonIgnore]
+        public UserData User { get; set; } = null!;
+
+        [JsonIgnore]
+        public UserAccess UserAccess { get; set; } = null!;
     }
 }
 /* Д.З. Впровадити картки товарів на сторінці окремої категорії

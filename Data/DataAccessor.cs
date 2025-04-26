@@ -85,7 +85,10 @@ namespace ASP_SPR311.Data
             }
             String login = parts[0];
             String password = parts[1];
-            var userAccess = _dataContext.UserAccesses.FirstOrDefault(ua => ua.Login == login);
+            var userAccess = _dataContext
+                .UserAccesses
+                .Include(ua => ua.UserData)
+                .FirstOrDefault(ua => ua.Login == login);
             if (userAccess == null)
             {
                 throw new Win32Exception(401, "Credentials rejected");
@@ -104,10 +107,45 @@ namespace ASP_SPR311.Data
                 Iat = DateTime.Now,
                 Nbf = null,
                 Exp = DateTime.Now.AddMinutes(10),
-                Iss = "ASP-SPR311"
+                Iss = "ASP-SPR311",
+                User = userAccess.UserData,
             };
             _dataContext.AccessTokens.Add(accessToken);
             _dataContext.SaveChanges();
+            return accessToken;
+        }
+
+        public AccessToken Authorize(HttpRequest Request)
+        {
+            String authHeader = Request.Headers.Authorization.ToString();
+            if (String.IsNullOrEmpty(authHeader))
+            {
+                throw new Win32Exception(401, "Authorization header required");
+            }
+            String scheme = "Bearer ";
+            if (!authHeader.StartsWith(scheme))
+            {
+                throw new Win32Exception(401, $"Authorization scheme must be {scheme}");
+            }
+            String credentials = authHeader[scheme.Length..];
+            Guid jti;
+            try { jti = Guid.Parse(credentials); }
+            catch
+            {
+                throw new Win32Exception(401, "Authorization credentials invalid formatted");
+            }
+            AccessToken? accessToken = _dataContext
+                .AccessTokens
+                .Include(t => t.User)
+                .FirstOrDefault(t => t.Jti == jti);
+            if (accessToken == null)
+            {
+                throw new Win32Exception(401, "Bearer credentials rejected");
+            }
+            if (accessToken.Exp < DateTime.Now)
+            {
+                throw new Win32Exception(401, "Bearer credentials expired");
+            }
             return accessToken;
         }
     }

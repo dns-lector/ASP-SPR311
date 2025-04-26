@@ -22,6 +22,16 @@ namespace ASP_SPR311.Data
             modelBuilder.HasDefaultSchema("ASP");
 
             modelBuilder.Entity<Entities.AccessToken>()
+                .HasOne(t => t.User)
+                .WithMany()
+                .HasForeignKey(t => t.Aud);
+
+            modelBuilder.Entity<Entities.AccessToken>()
+                .HasOne(t => t.UserAccess)
+                .WithMany()
+                .HasForeignKey(t => t.Sub);
+
+            modelBuilder.Entity<Entities.AccessToken>()
                 .HasKey(t => t.Jti);
 
             modelBuilder.Entity<Entities.CartItem>()
