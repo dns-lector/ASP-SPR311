@@ -2,6 +2,10 @@
 
 namespace ASP_SPR311.Data.Entities
 {
+    /// <summary>
+    /// Represents an access token with properties for unique identifiers, issuance, expiration, and associated user
+    /// data. Includes fields for Jti, Sub, Aud, Iat, Nbf, Exp, and Iss.
+    /// </summary>
     public class AccessToken
     {
         public Guid      Jti { get; set; }

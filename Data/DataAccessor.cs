@@ -49,6 +49,12 @@ namespace ASP_SPR311.Data
             return category;
         }
 
+        /// <summary>
+        /// Authenticates a user using Basic HTTP authentication and generates an access token.
+        /// </summary>
+        /// <param name="Request">Contains the HTTP request data, including the authorization header for authentication.</param>
+        /// <returns>An access token for the authenticated user.</returns>
+        /// <exception cref="Win32Exception">Thrown when the authorization header is missing, invalid, or when credentials are rejected.</exception>
         public AccessToken Authenticate(HttpRequest Request)
         {
             // 'Basic' HTTP Authentication Scheme  https://datatracker.ietf.org/doc/html/rfc7617#section-2
