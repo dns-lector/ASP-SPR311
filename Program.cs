@@ -15,9 +15,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 
-// Реєструємо сервіси
+// ГђГҐВєГ±ГІГ°ГіВєГ¬Г® Г±ГҐГ°ГўВіГ±ГЁ
 // builder.Services.AddSingleton<ITimestampService, SystemTimestampService>();
-// приклад заміни сервісу SystemTimestampService на UnixTimestampService
+// ГЇГ°ГЁГЄГ«Г Г¤ Г§Г Г¬ВіГ­ГЁ Г±ГҐГ°ГўВіГ±Гі SystemTimestampService Г­Г  UnixTimestampService
 builder.Services.AddSingleton<ITimestampService, UnixTimestampService>();
 // builder.Services.AddTransient<ITimestampService, UnixTimestampService>();
 
@@ -25,7 +25,7 @@ builder.Services.AddSingleton<IKdfService, PbKdf1Service>();
 builder.Services.AddSingleton<IStorageService, FileStorageService>();
 
 
-// Налаштування сесій - тривалого сховища, що дозволяє зберігати дані між запитами
+// ГЌГ Г«Г ГёГІГіГўГ Г­Г­Гї Г±ГҐГ±ВіГ© - ГІГ°ГЁГўГ Г«Г®ГЈГ® Г±ГµГ®ГўГЁГ№Г , Г№Г® Г¤Г®Г§ГўГ®Г«ГїВє Г§ГЎГҐГ°ВіГЈГ ГІГЁ Г¤Г Г­Ві Г¬ВіГ¦ Г§Г ГЇГЁГІГ Г¬ГЁ
 // https://learn.microsoft.com/ru-ru/aspnet/core/fundamentals/app-state?view=aspnetcore-9.0
 builder.Services.AddDistributedMemoryCache();
 
@@ -36,14 +36,14 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// Реєстрація контексту даних - аналогічна до сервісів
-builder.Services.AddDbContext<DataContext>(   // Метод реєстрації - AddDbContext
-    options =>                                // options - те, що передається до 
-        options                               // конструктора DataContext(DbContextOptions options)
-        .UseSqlServer(                        // UseSqlServer - конфігурація для 
+// ГђГҐВєГ±ГІГ°Г Г¶ВіГї ГЄГ®Г­ГІГҐГЄГ±ГІГі Г¤Г Г­ГЁГµ - Г Г­Г Г«Г®ГЈВіГ·Г­Г  Г¤Г® Г±ГҐГ°ГўВіГ±ВіГў
+builder.Services.AddDbContext<DataContext>(   // ГЊГҐГІГ®Г¤ Г°ГҐВєГ±ГІГ°Г Г¶ВіВї - AddDbContext
+    options =>                                // options - ГІГҐ, Г№Г® ГЇГҐГ°ГҐГ¤Г ВєГІГјГ±Гї Г¤Г® 
+        options                               // ГЄГ®Г­Г±ГІГ°ГіГЄГІГ®Г°Г  DataContext(DbContextOptions options)
+        .UseSqlServer(                        // UseSqlServer - ГЄГ®Г­ГґВіГЈГіГ°Г Г¶ВіГї Г¤Г«Гї 
             builder.Configuration             // MS SQL Server
-            .GetConnectionString("LocalMs")   // builder.Configuration - доступ до
-        )                                     // файлів конфігурації (appsettings.json)
+            .GetConnectionString("LocalMs")   // builder.Configuration - Г¤Г®Г±ГІГіГЇ Г¤Г®
+        )                                     // ГґГ Г©Г«ВіГў ГЄГ®Г­ГґВіГЈГіГ°Г Г¶ВіВї (appsettings.json)
 );
 builder.Services.AddScoped<DataAccessor>();
 
@@ -84,7 +84,7 @@ app.UseCors("CorsPolicy");
 
 app.UseAuthorization();
 
-app.UseSession();   // Включення сесій
+app.UseSession();   // Г‚ГЄГ«ГѕГ·ГҐГ­Г­Гї Г±ГҐГ±ВіГ©
 
 app.UseAuthSession();
 
@@ -101,9 +101,10 @@ await using var dataContext = scope.ServiceProvider.GetRequiredService<DataConte
 await dataContext.Database.MigrateAsync();
 
 app.Run();
-/* Д.З. Створити сервіс генерування випадкового ОТР (one time password) 
- * числа заданої довжини, наприклад, 6 цифр (кількість цифр передається параметром)
- * Інжектувати до HomeController, вивести у складі довільного представлення.
- * * Доповнити контентом сторінки щодо Razor, Ioc, Intro
+/* Г„.Г‡. Г‘ГІГўГ®Г°ГЁГІГЁ Г±ГҐГ°ГўВіГ± ГЈГҐГ­ГҐГ°ГіГўГ Г­Г­Гї ГўГЁГЇГ Г¤ГЄГ®ГўГ®ГЈГ® ГЋГ’Гђ (one time password) 
+ * Г·ГЁГ±Г«Г  Г§Г Г¤Г Г­Г®Вї Г¤Г®ГўГ¦ГЁГ­ГЁ, Г­Г ГЇГ°ГЁГЄГ«Г Г¤, 6 Г¶ГЁГґГ° (ГЄВіГ«ГјГЄВіГ±ГІГј Г¶ГЁГґГ° ГЇГҐГ°ГҐГ¤Г ВєГІГјГ±Гї ГЇГ Г°Г Г¬ГҐГІГ°Г®Г¬)
+ * ВІГ­Г¦ГҐГЄГІГіГўГ ГІГЁ Г¤Г® HomeController, ГўГЁГўГҐГ±ГІГЁ Гі Г±ГЄГ«Г Г¤Ві Г¤Г®ГўВіГ«ГјГ­Г®ГЈГ® ГЇГ°ГҐГ¤Г±ГІГ ГўГ«ГҐГ­Г­Гї.
+ * * Г„Г®ГЇГ®ГўГ­ГЁГІГЁ ГЄГ®Г­ГІГҐГ­ГІГ®Г¬ Г±ГІГ®Г°ВіГ­ГЄГЁ Г№Г®Г¤Г® Razor, Ioc, Intro
  */
+// Edited from Github
 // Edited from VS
