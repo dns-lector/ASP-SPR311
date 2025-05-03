@@ -107,5 +107,4 @@ app.Run();
  * * Äîïîâíèòè êîíòåíòîì ñòîð³íêè ùîäî Razor, Ioc, Intro
  */
 // Edited from Github
-
-// Edited from Rider
+// Edited from VS
